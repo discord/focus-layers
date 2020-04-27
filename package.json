@@ -1,6 +1,6 @@
 {
   "name": "focus-layers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Jon Egeland <jonegeland@gmail.com>",
   "description": "Tiny React hooks for isolating focus within subsections of the DOM.",
   "keywords": [
@@ -13,13 +13,13 @@
     "typescript"
   ],
   "main": "src/index.tsx",
-  "dependencies": {
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+  "peerDependencies": {
+    "react": "^16.8.0"
   },
   "devDependencies": {
     "@types/react": "16.9.19",
     "@types/react-dom": "16.9.5",
+    "react-dom": "^16.12.0",
     "typescript": "3.7.5"
   },
   "browserslist": [
