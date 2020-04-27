@@ -224,6 +224,24 @@ is told to (via the callback). Adding your lock to the stack is also a promise t
 it from the stack once the lock is "unmounted" or otherwise removed from use. Without removing your
 lock, all layers below your lock will be unable to regain focus.
 
+If you are inside of a component and want to tie the focus lock to its lifecycle, you can instead use
+the `useFocusLayer` hook to simplify adding and removing. In return it provides a boolean indicating
+whether the lock is currently enabled, and will force a re-render when that state changes:
+
+```typescript
+import {useFocusLayer} from 'focus-layers';
+
+function Component() {
+  const enabled = useFocusLayer();
+ 
+  React.useEffect(() => {
+    toggleCustomLock(enabled);
+  }, [enabled]);
+ 
+  return <p>Custom lock is {enabled ? "enabled" : "disabled"}</p>;
+}
+```
+
 ## Free Focus Layers
 
 Custom locks can also be used to implement "free focus layers" without losing the context of the
@@ -236,22 +254,17 @@ A free focus layer can easily be implemented as part of a Component. In the sing
 use case mentioned above, this might happen in the base `View` component that wraps each view.
 
 ```typescript
-import {LOCK_STACK} from 'focus-layers';
+import {useFocusLayer} from 'focus-layers';
 
-function View({id}: {id: string}) {
-  React.useEffect(() => {
-    LOCK_STACK.add(id, () => null);
-    return () => LOCK_STACK.remove(id);
-  }, []);
+function View() {
+  useFocusLayer();
   
   return <div />;
 }
 ```
 
-Notice that, since this layer doesn't have any locking behavior, the `setEnabled` callback of the
-call to `add` is no-op. It is also tied directly to the lifecycle of the component (the effect has
-an empty dependency array). Otherwise, if the dependency got updated while there were other layers
-above this one, it would get removed and then placed on top, effectively breaking the stack.
+The layer gets added on mount, disabling all layers below it, and since there's no new lock to
+activate, the return value is just ignored, and nothing else needs to happen.
 
 ## Alternatives
 
