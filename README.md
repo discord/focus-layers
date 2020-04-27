@@ -131,7 +131,7 @@ function App() {
   const [focusLockActive, setFocusLockActive] = React.useState(false);
   React.useEffect(() => {
     LOCK_STACK.subscribe(setFocusLockActive);
-    return () => LOCK_STACK.subscribe(setFocusLockActive);
+    return () => LOCK_STACK.unsubscribe(setFocusLockActive);
   }, []);
   
   return (
