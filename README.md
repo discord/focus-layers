@@ -197,11 +197,68 @@ Portals already do not play well with tab orders and should generally not be use
 than an isolated focus layer. Otherwise the entire premise that focus is locked into the layer is
 effectively broken anyway.
 
+## External Focus Layers
+
+The `LOCK_STACK` provides a way of integrating your own layers into the system. This can be useful
+when integrating with other libraries or components that implement their own focus management, or
+manually triggering focus locks that aren't tied to a component lifecycle.
+
+Activating a layer is as simple as calling `add` with a `uid` and an `EnabledCallback`, which will be
+called when the `LOCK_STACK` determines that the layer should be active. The callback will be invoked
+immediately by the call to `add`, indicating that the layer is now active. The layer can then be
+removed at any time in the future via the `remove` method.
+
+```typescript
+import {LOCK_STACK} from 'focus-layers';
+
+const enabled = false;
+const setEnabled = (now) => enabled = now;
+
+LOCK_STACK.add("custom lock", setEnabled);
+// Sometime later
+LOCK_STACK.remove("custom lock");
+```
+
+Integrating with the `LOCK_STACK` is a promise that your lock will enable and disable itself when it
+is told to (via the callback). Adding your lock to the stack is also a promise that you will remove
+it from the stack once the lock is "unmounted" or otherwise removed from use. Without removing your
+lock, all layers below your lock will be unable to regain focus.
+
+## Free Focus Layers
+
+Custom locks can also be used to implement "free focus layers" without losing the context of the
+focus layers that are currently in place. Free focus is a situation where focus is not locked into
+any subsection and can move freely throughout the document. This can be useful for single-page
+applications that want to preserve focus state between mutiple views where previous views get
+removed from the DOM while another view takes its place.
+
+A free focus layer can easily be implemented as part of a Component. In the single-page application
+use case mentioned above, this might happen in the base `View` component that wraps each view.
+
+```typescript
+import {LOCK_STACK} from 'focus-layers';
+
+function View({id}: {id: string}) {
+  React.useEffect(() => {
+    LOCK_STACK.add(id, () => null);
+    return () => LOCK_STACK.remove(id);
+  }, []);
+  
+  return <div />;
+}
+```
+
+Notice that, since this layer doesn't have any locking behavior, the `setEnabled` callback of the
+call to `add` is no-op. It is also tied directly to the lifecycle of the component (the effect has
+an empty dependency array). Otherwise, if the dependency got updated while there were other layers
+above this one, it would get removed and then placed on top, effectively breaking the stack.
+
 ## Alternatives
 
 This library was created after multiple attempts at using other focus locking libraries and wanting
-something with a simpler implementation that leverages the browser's APIs as much as possible. There
-are multiple other options out there that do a simlar job in different ways, such as:
+something with a simpler implementation that leverages the browser's APIs as much as possible, and
+fewer implications on DOM and Component structures. There are multiple other options out there that
+perform a simlar job in different ways, such as:
 
 - [react-focus-lock](https://github.com/theKashey/react-focus-lock): Lots of options, very flexible,
   but uses a lot of DOM nodes and attributes.
