@@ -1,16 +1,14 @@
 import * as React from "react";
 
-import useFocusLock, { useFocusReturn, FocusGuard } from "./useFocusLock";
+import useFocusLock, { FocusGuard } from "./useFocusLock";
 
 import "./App.mod.css";
 
 type DialogProps = {
 	children: React.ReactNode;
-	returnTo?: React.RefObject<HTMLElement>;
 };
-function Dialog({ children, returnTo }: DialogProps) {
+function Dialog({ children }: DialogProps) {
 	const containerRef = React.useRef<HTMLDivElement>(null);
-	useFocusReturn(returnTo);
 	useFocusLock(containerRef);
 
 	return (
