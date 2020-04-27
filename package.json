@@ -3,7 +3,7 @@
   "version": "0.1.2",
   "author": "Jon Egeland <jonegeland@gmail.com>",
   "description": "Tiny React hooks for isolating focus within subsections of the DOM.",
-  "license": "ISC",
+  "license": "MIT",
   "homepage": "https://github.com/faultyserver/focus-layers#readme",
   "keywords": [
     "a11y",
