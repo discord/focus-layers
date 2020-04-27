@@ -12,7 +12,7 @@ Call `useFocusLock` inside a component and provide it a ref to the DOM node to u
 for the focus layer. When the component mounts, it will lock focus to elements within that node, and
 the lock will be released when the component unmounts.
 
-```typescript
+```tsx
 import useFocusLock from "focus-layers";
 
 function Dialog({ children }: { children: React.ReactNode }) {
@@ -51,7 +51,7 @@ function App() {
 After unmounting, locks will return focus to the element that was focused when the lock was mounted.
 This return target can also be controlled by the second parameter of `useFocusLock`.
 
-```typescript
+```tsx
 function DialogWithExplicitReturn() {
   const [open, setOpen] = React.useState(false);
 
@@ -82,7 +82,7 @@ active lock. Layers can be removed in any order, and the top layer will always r
 This is useful for implementing confirmations inside of modals, or flows between multiple
 independent modals, where one dialog will open another, and so on.
 
-```typescript
+```tsx
 function LayeredDialogs() {
   const [firstOpen, setFirstOpen] = React.useState(false);
   const [secondOpen, setSecondOpen] = React.useState(false);
@@ -139,7 +139,7 @@ when any focus layer is active, and hide itself otherwise. It renders a div that
 hidden, but becomes tabbable when active. These can be added at the actual edges of the DOM, or just
 directly surrounding any active focus layers.
 
-```typescript
+```tsx
 import { FocusGuard } from "focus-layers";
 
 function App() {
