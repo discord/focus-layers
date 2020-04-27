@@ -1,6 +1,6 @@
 {
   "name": "focus-layers",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Jon Egeland <jonegeland@gmail.com>",
   "description": "Tiny React hooks for isolating focus within subsections of the DOM.",
   "license": "MIT",
@@ -36,7 +36,7 @@
   "scripts": {
     "format": "prettier --write '**'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && microbundle src/useFocusLock.tsx --external react --name useFocusLock",
+    "build": "rm -rf dist && microbundle --external react --name useFocusLock",
     "prepublishOnly": "npm run -s build"
   },
   "peerDependencies": {
