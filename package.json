@@ -4,6 +4,7 @@
   "author": "Jon Egeland <jonegeland@gmail.com>",
   "description": "Tiny React hooks for isolating focus within subsections of the DOM.",
   "license": "MIT",
+  "repository": "faultyserver/focus-layers",
   "homepage": "https://github.com/faultyserver/focus-layers#readme",
   "keywords": [
     "a11y",
@@ -19,7 +20,9 @@
     "react",
     "hook",
     "use",
-    "typescript"
+    "typescript",
+    "micro",
+    "tiny"
   ],
   "source": "src/useFocusLock.tsx",
   "main": "dist/useFocusLock.js",
@@ -27,12 +30,13 @@
   "module": "dist/useFocusLock.module.js",
   "unpkg": "dist/useFocusLock.umd.js",
   "files": [
+    "src",
     "dist"
   ],
   "scripts": {
     "format": "prettier --write '**'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && microbundle --external react --name useFocusLock",
+    "build": "rm -rf dist && microbundle src/useFocusLock.tsx --external react --name useFocusLock",
     "prepublishOnly": "npm run -s build"
   },
   "peerDependencies": {
@@ -45,10 +49,6 @@
     "prettier": "^2.0.4",
     "react-dom": "^16.12.0",
     "typescript": "3.7.5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/faultyserver/focus-layers.git"
   },
   "bugs": {
     "url": "https://github.com/faultyserver/focus-layers/issues"
