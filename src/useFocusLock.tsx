@@ -67,7 +67,7 @@ class LockStack {
 // This global ensures that only one stack exists in the document. Having multiple
 // active stacks does not make sense, as documents are only capable of having one
 // activeElement at a time.
-const LOCK_STACK = new LockStack();
+export const LOCK_STACK = new LockStack();
 
 let lockCount = 0;
 function newLockUID() {
