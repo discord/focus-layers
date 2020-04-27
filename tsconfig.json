@@ -1,0 +1,19 @@
+{
+    "include": [
+        "./src/*"
+    ],
+    "compilerOptions": {
+        "strict": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "lib": [
+            "dom",
+            "es2017"
+        ],
+        "jsx": "react",
+        "typeRoots": [
+            "./typings",
+            "./node_modules/@types"
+        ]
+    }
+}
