@@ -27,5 +27,20 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/faultyserver/focus-layers.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/faultyserver/focus-layers/issues"
+  },
+  "homepage": "https://github.com/faultyserver/focus-layers#readme"
 }
