@@ -120,6 +120,32 @@ Note that layers only track their own return targets. If multiple layers are unm
 always guaranteed that the original return target will be focused afterward. In this case, it is
 best to provide an explicit return target so that focus is not left ambiguous after unmounting.
 
+Layers are managed by a global `LOCK_STACK` object. You can subscribe to this stack to get updates
+whenever any focus layers are active. This is useful for marking the rest of your app with
+`aria-hidden` when modals are active, or performing any other tasks on demand:
+
+```tsx
+import {LOCK_STACK} from 'focus-layers';
+
+function App() {
+  const [focusLockActive, setFocusLockActive] = React.useState(false);
+  React.useEffect(() => {
+    LOCK_STACK.subscribe(setFocusLockActive);
+    return () => LOCK_STACK.subscribe(setFocusLockActive);
+  }, []);
+  
+  return (
+    <React.Fragment>
+      // This div represents your main app content
+      <div aria-hidden={focusLockActive} />
+      // This div would be where the dialog layers are rendered
+      <div />
+    </React.Fragment>
+  );
+}
+```
+
+
 ## Edge Guards
 
 Browsers do not provide a clean way of intercepting focus events that cause focus to leave the DOM.
