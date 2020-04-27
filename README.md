@@ -266,6 +266,31 @@ function View() {
 The layer gets added on mount, disabling all layers below it, and since there's no new lock to
 activate, the return value is just ignored, and nothing else needs to happen.
 
+Free focus layers are also great for compatibility with libraries or other operations that rely on
+moving focus around the DOM like some implementations of `copy` utilities and masked inputs. For
+example, a copy action could add and remove a layer around the operation to allow it to reference a
+`textarea` outside of a dialog layer:
+
+```typescript
+import {LOCK_STACK} from 'focus-layers';
+
+function copy(someText: string) {
+  LOCK_STACK.add('copy', () => null);
+  doCopy(someText);
+  LOCK_STACK.remove('copy');
+}
+
+function DialogWithCopyableText() {
+  const text = "this is the copied text";
+  
+  return (
+    <Dialog>
+      <button onClick={() => copy(text)}>Copy some text</button>
+    </Dialgo>
+  );
+}
+```
+
 ## Alternatives
 
 This library was created after multiple attempts at using other focus locking libraries and wanting
