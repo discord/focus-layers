@@ -1,16 +1,12 @@
 import * as React from "react";
 
-// Focus lock, but without all the extra divs
-// Utilizing the DOM Range API and native window events to get out of React's
-// event system and properly detect when focus moves outside of a DOM container.
-
 type EnabledCallback = (enabled: boolean) => unknown;
 type StackEntry = { uid: string; setEnabled: EnabledCallback };
 
 class LockStack {
   stack: StackEntry[] = [];
   listeners = new Set<EnabledCallback>();
-  lastActive = false;
+  active = false;
 
   add(uid: string, setEnabled: EnabledCallback) {
     const current = this.current();
@@ -57,9 +53,9 @@ class LockStack {
 
   emit() {
     const isActive = this.current() != null;
-    if (isActive !== this.lastActive) {
+    if (isActive !== this.active) {
       this.listeners.forEach((callback) => callback(isActive));
-      this.lastActive = isActive;
+      this.active = isActive;
     }
   }
 }

@@ -1,11 +1,11 @@
 {
   "name": "focus-layers",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Jon Egeland <jonegeland@gmail.com>",
   "description": "Tiny React hooks for isolating focus within subsections of the DOM.",
   "license": "MIT",
-  "repository": "faultyserver/focus-layers",
-  "homepage": "https://github.com/faultyserver/focus-layers#readme",
+  "repository": "discord/focus-layers",
+  "homepage": "https://github.com/discord/focus-layers#readme",
   "keywords": [
     "a11y",
     "focus",
@@ -51,6 +51,6 @@
     "typescript": "3.7.5"
   },
   "bugs": {
-    "url": "https://github.com/faultyserver/focus-layers/issues"
+    "url": "https://github.com/discord/focus-layers/issues"
   }
 }
