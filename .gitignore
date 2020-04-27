@@ -1,13 +1,4 @@
-node_modules/
-.vscode/
-
-logs/
+node_modules
 *.log
-
-dist/
-
-.yarn/
-yarn.lock
-yarn-error.log
-yarn-debug.log
-npm-debug.log
+.rts2_cache_*
+dist
