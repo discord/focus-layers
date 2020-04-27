@@ -16,33 +16,33 @@ the lock will be released when the component unmounts.
 import useFocusLock from "focus-layers";
 
 function Dialog({ children }: { children: React.ReactNode }) {
-	const containerRef = useRef<HTMLElement>();
-	useFocusLock(containerRef);
+  const containerRef = useRef<HTMLElement>();
+  useFocusLock(containerRef);
 
-	return (
-		<div ref={containerRef} tabIndex={-1}>
-			{children}
-		</div>
-	);
+  return (
+    <div ref={containerRef} tabIndex={-1}>
+      {children}
+    </div>
+  );
 }
 
 function App() {
-	const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
 
-	return (
-		<div>
-			<button onClick={() => setOpen(true)}>Show Dialog</button>
-			{open && (
-				<Dialog>
-					<p>
-						When this dialog is open, focus is trapped inside! Tabbing will always bring focus back
-						to this button.
-					</p>
-					<button onClick={() => setOpen(false)}>Close Dialog</button>
-				</Dialog>
-			)}
-		</div>
-	);
+  return (
+    <div>
+      <button onClick={() => setOpen(true)}>Show Dialog</button>
+      {open && (
+        <Dialog>
+          <p>
+            When this dialog is open, focus is trapped inside! Tabbing will always bring focus back
+            to this button.
+          </p>
+          <button onClick={() => setOpen(false)}>Close Dialog</button>
+        </Dialog>
+      )}
+    </div>
+  );
 }
 ```
 
@@ -53,23 +53,23 @@ This return target can also be controlled by the second parameter of `useFocusLo
 
 ```typescript
 function DialogWithExplicitReturn() {
-	const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
 
-	const containerRef = React.useRef<HTMLDivElement>();
-	const returnRef = React.useRef<HTMLButtonElement>();
-	useFocusLock(containerRef, returnRef);
+  const containerRef = React.useRef<HTMLDivElement>();
+  const returnRef = React.useRef<HTMLButtonElement>();
+  useFocusLock(containerRef, returnRef);
 
-	return (
-		<React.Fragment>
-			<button ref={returnRef}>Focus will be returned here</button>
-			<button onClick={() => setOpen(true)}>Even though this button opens the Dialog</button>
-			{open && (
-				<Dialog>
-					<button onClick={() => setOpen(false)}>Close Dialog</button>
-				</Dialog>
-			)}
-		</React.Fragment>
-	);
+  return (
+    <React.Fragment>
+      <button ref={returnRef}>Focus will be returned here</button>
+      <button onClick={() => setOpen(true)}>Even though this button opens the Dialog</button>
+      {open && (
+        <Dialog>
+          <button onClick={() => setOpen(false)}>Close Dialog</button>
+        </Dialog>
+      )}
+    </React.Fragment>
+  );
 }
 ```
 
@@ -84,35 +84,35 @@ independent modals, where one dialog will open another, and so on.
 
 ```typescript
 function LayeredDialogs() {
-	const [firstOpen, setFirstOpen] = React.useState(false);
-	const [secondOpen, setSecondOpen] = React.useState(false);
+  const [firstOpen, setFirstOpen] = React.useState(false);
+  const [secondOpen, setSecondOpen] = React.useState(false);
 
-	return (
-		<div>
-			<button onClick={() => setFirstOpen(true)}>Open First Dialog</button>
+  return (
+    <div>
+      <button onClick={() => setFirstOpen(true)}>Open First Dialog</button>
 
-			{firstOpen && (
-				<Dialog>
-					<p>This is the first dialog that has a second confirmation after it.</p>
-					<button onClick={() => setSecondOpen(true)}>Confirm</button>
-				</Dialog>
-			)}
+      {firstOpen && (
+        <Dialog>
+          <p>This is the first dialog that has a second confirmation after it.</p>
+          <button onClick={() => setSecondOpen(true)}>Confirm</button>
+        </Dialog>
+      )}
 
-			{secondOpen && (
-				<Dialog>
-					<p>This is the second dialog, opened by the first one.</p>
-					<button onClick={() => setSecondOpen(false)}>Confirm this dialog</button>
-					<button
-						onClick={() => {
-							setSecondOpen(false);
-							setFirstOpen(false);
-						}}>
-						Close both dialogs
-					</button>
-				</Dialog>
-			)}
-		</div>
-	);
+      {secondOpen && (
+        <Dialog>
+          <p>This is the second dialog, opened by the first one.</p>
+          <button onClick={() => setSecondOpen(false)}>Confirm this dialog</button>
+          <button
+            onClick={() => {
+              setSecondOpen(false);
+              setFirstOpen(false);
+            }}>
+            Close both dialogs
+          </button>
+        </Dialog>
+      )}
+    </div>
+  );
 }
 ```
 
@@ -143,13 +143,13 @@ directly surrounding any active focus layers.
 import { FocusGuard } from "focus-layers";
 
 function App() {
-	return (
-		<div id="app-root">
-			<FocusGuard />
-			// Render the rest of your app or your modal layers here.
-			<FocusGuard />
-		</div>
-	);
+  return (
+    <div id="app-root">
+      <FocusGuard />
+      // Render the rest of your app or your modal layers here.
+      <FocusGuard />
+    </div>
+  );
 }
 ```
 
