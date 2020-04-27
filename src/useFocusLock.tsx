@@ -102,12 +102,13 @@ function wrapFocus(root: HTMLElement, target: Element, previousElement?: Element
 }
 
 export function useFocusReturn(returnTo?: React.RefObject<HTMLElement>) {
-	const [targetRef] = React.useState(() => returnTo || { current: document.activeElement });
+	const [focusedOnMount] = React.useState(() => document.activeElement);
 
-	React.useEffect(() => {
-		const target = targetRef.current;
-
+	React.useLayoutEffect(() => {
 		return () => {
+			// Specifically want the actual current value when this hook is cleaning up.
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+			const target = returnTo != null ? returnTo.current : focusedOnMount;
 			// Happens on next tick to ensure it is not overwritten by focus lock.
 			Promise.resolve().then(() => {
 				// TODO: how is this typeable? `Element` doesn't implement `focus`
@@ -132,8 +133,12 @@ export function useLockLayer(controlledUID?: string) {
 	return enabled;
 }
 
-export function useFocusLock(containerRef: React.RefObject<HTMLElement>) {
+export function useFocusLock(
+	containerRef: React.RefObject<HTMLElement>,
+	returnRef?: React.RefObject<HTMLElement>,
+) {
 	const enabled = useLockLayer();
+	useFocusReturn(returnRef);
 
 	React.useLayoutEffect(() => {
 		if (!enabled) return;
