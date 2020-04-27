@@ -1,7 +1,7 @@
 {
   "name": "focus-layers",
   "version": "1.0.0",
-  "description": "React hooks for isolating focus within subsections of the DOM.\n\nNo extraneous divs, no wrapper components, no emulation, using only native APIs and events.",
+  "description": "",
   "keywords": [],
   "main": "src/index.tsx",
   "dependencies": {
