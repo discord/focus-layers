@@ -1,8 +1,10 @@
 {
   "name": "focus-layers",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Jon Egeland <jonegeland@gmail.com>",
   "description": "Tiny React hooks for isolating focus within subsections of the DOM.",
+  "license": "ISC",
+  "homepage": "https://github.com/faultyserver/focus-layers#readme",
   "keywords": [
     "a11y",
     "focus-lock",
@@ -12,7 +14,12 @@
     "react",
     "typescript"
   ],
-  "main": "src/index.tsx",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "peerDependencies": {
     "react": "^16.8.0"
   },
@@ -22,25 +29,11 @@
     "react-dom": "^16.12.0",
     "typescript": "3.7.5"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
-  "directories": {
-    "example": "examples"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/faultyserver/focus-layers.git"
   },
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/faultyserver/focus-layers/issues"
-  },
-  "homepage": "https://github.com/faultyserver/focus-layers#readme"
+  }
 }
