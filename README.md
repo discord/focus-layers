@@ -16,7 +16,7 @@ the lock will be released when the component unmounts.
 import useFocusLock from "focus-layers";
 
 function Dialog({ children }: { children: React.ReactNode }) {
-  const containerRef = useRef<HTMLElement>();
+  const containerRef = React.useRef<HTMLElement>();
   useFocusLock(containerRef);
 
   return (
@@ -228,7 +228,7 @@ If you are inside of a component and want to tie the focus lock to its lifecycle
 the `useFocusLayer` hook to simplify adding and removing. In return it provides a boolean indicating
 whether the lock is currently enabled, and will force a re-render when that state changes:
 
-```typescript
+```tsx
 import {useFocusLayer} from 'focus-layers';
 
 function Component() {
@@ -253,7 +253,7 @@ removed from the DOM while another view takes its place.
 A free focus layer can easily be implemented as part of a Component. In the single-page application
 use case mentioned above, this might happen in the base `View` component that wraps each view.
 
-```typescript
+```tsx
 import {useFocusLayer} from 'focus-layers';
 
 function View() {
@@ -271,7 +271,7 @@ moving focus around the DOM like some implementations of `copy` utilities and ma
 example, a copy action could add and remove a layer around the operation to allow it to reference a
 `textarea` outside of a dialog layer:
 
-```typescript
+```tsx
 import {LOCK_STACK} from 'focus-layers';
 
 function copy(someText: string) {
