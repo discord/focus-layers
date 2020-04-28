@@ -120,12 +120,14 @@ Note that layers only track their own return targets. If multiple layers are unm
 always guaranteed that the original return target will be focused afterward. In this case, it is
 best to provide an explicit return target so that focus is not left ambiguous after unmounting.
 
+## Subscribing to the Lock Stack
+
 Layers are managed by a global `LOCK_STACK` object. You can subscribe to this stack to get updates
 whenever any focus layers are active. This is useful for marking the rest of your app with
 `aria-hidden` when modals are active, or performing any other tasks on demand:
 
 ```tsx
-import {LOCK_STACK} from 'focus-layers';
+import { LOCK_STACK } from "focus-layers";
 
 function App() {
   const [focusLockActive, setFocusLockActive] = React.useState(false);
@@ -133,7 +135,7 @@ function App() {
     LOCK_STACK.subscribe(setFocusLockActive);
     return () => LOCK_STACK.unsubscribe(setFocusLockActive);
   }, []);
-  
+
   return (
     <React.Fragment>
       // This div represents your main app content
@@ -145,6 +147,19 @@ function App() {
 }
 ```
 
+The `subscribe` and `unsubscribe` methods are useful for listening to stack changes outside of the
+React's rendering pipeline, but as a convenience, the `useLockSubscription` hook performs the same
+behavior tied to a component's lifecycle.
+
+```tsx
+import { useLockSubscription } from "focus-layers";
+
+function Component() {
+  useLockSubscription((enabled) =>
+    console.log(`focus locking is now ${enabled ? "enabled" : "disabled"}`),
+  );
+}
+```
 
 ## Edge Guards
 
@@ -203,16 +218,16 @@ The `LOCK_STACK` provides a way of integrating your own layers into the system. 
 when integrating with other libraries or components that implement their own focus management, or
 manually triggering focus locks that aren't tied to a component lifecycle.
 
-Activating a layer is as simple as calling `add` with a `uid` and an `EnabledCallback`, which will be
-called when the `LOCK_STACK` determines that the layer should be active. The callback will be invoked
-immediately by the call to `add`, indicating that the layer is now active. The layer can then be
-removed at any time in the future via the `remove` method.
+Activating a layer is as simple as calling `add` with a `uid` and an `EnabledCallback`, which will
+be called when the `LOCK_STACK` determines that the layer should be active. The callback will be
+invoked immediately by the call to `add`, indicating that the layer is now active. The layer can
+then be removed at any time in the future via the `remove` method.
 
 ```typescript
-import {LOCK_STACK} from 'focus-layers';
+import { LOCK_STACK } from "focus-layers";
 
 const enabled = false;
-const setEnabled = (now) => enabled = now;
+const setEnabled = (now) => (enabled = now);
 
 LOCK_STACK.add("custom lock", setEnabled);
 // Sometime later
@@ -224,20 +239,21 @@ is told to (via the callback). Adding your lock to the stack is also a promise t
 it from the stack once the lock is "unmounted" or otherwise removed from use. Without removing your
 lock, all layers below your lock will be unable to regain focus.
 
-If you are inside of a component and want to tie the focus lock to its lifecycle, you can instead use
-the `useFocusLayer` hook to simplify adding and removing. In return it provides a boolean indicating
-whether the lock is currently enabled, and will force a re-render when that state changes:
+If you are inside of a component and want to tie the focus lock to its lifecycle, you can instead
+use the `useLockLayer` hook to simplify adding and removing. In return it provides a boolean
+indicating whether the lock is currently enabled, and will force a re-render when that state
+changes:
 
 ```tsx
-import {useFocusLayer} from 'focus-layers';
+import { useLockLayer } from "focus-layers";
 
 function Component() {
-  const enabled = useFocusLayer();
- 
+  const enabled = useLockLayer();
+
   React.useEffect(() => {
     toggleCustomLock(enabled);
   }, [enabled]);
- 
+
   return <p>Custom lock is {enabled ? "enabled" : "disabled"}</p>;
 }
 ```
@@ -254,11 +270,11 @@ A free focus layer can easily be implemented as part of a Component. In the sing
 use case mentioned above, this might happen in the base `View` component that wraps each view.
 
 ```tsx
-import {useFocusLayer} from 'focus-layers';
+import { useLockLayer } from "focus-layers";
 
 function View() {
-  useFocusLayer();
-  
+  useLockLayer();
+
   return <div />;
 }
 ```
@@ -272,7 +288,7 @@ example, a copy action could add and remove a layer around the operation to allo
 `textarea` outside of a dialog layer:
 
 ```tsx
-import {LOCK_STACK} from 'focus-layers';
+import { LOCK_STACK } from 'focus-layers';
 
 function copy(someText: string) {
   LOCK_STACK.add('copy', () => null);
@@ -282,7 +298,7 @@ function copy(someText: string) {
 
 function DialogWithCopyableText() {
   const text = "this is the copied text";
-  
+
   return (
     <Dialog>
       <button onClick={() => copy(text)}>Copy some text</button>

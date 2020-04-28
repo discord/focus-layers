@@ -70,6 +70,13 @@ function newLockUID() {
   return `lock-${lockCount++}`;
 }
 
+export function useLockSubscription(callback: EnabledCallback) {
+  React.useEffect(() => {
+    LOCK_STACK.subscribe(callback);
+    return () => LOCK_STACK.unsubscribe(callback);
+  }, [callback]);
+}
+
 function createFocusWalker(root: HTMLElement) {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
     acceptNode: (node: HTMLElement) =>
@@ -166,10 +173,7 @@ export default useFocusLock;
 
 export const FocusGuard = React.memo(() => {
   const [active, setActive] = React.useState(false);
-  React.useEffect(() => {
-    LOCK_STACK.subscribe(setActive);
-    return () => LOCK_STACK.unsubscribe(setActive);
-  }, []);
+  useLockSubscription(setActive);
 
   return (
     <div
