@@ -10,12 +10,17 @@ export default function SimpleExample() {
       <h1>Simple Example</h1>
 
       <p>
+        An example of a simple dialog with some tabbable elements inside of it. Clicking "Show
+        Dialog" will open the dialog container and trap focus within it. Try tabbing around the
+        buttons freely before hand, then tab around after opening the dialog and see how focus is
+        cycled within the container.
+      </p>
+
+      <p>
         <button>Button 1</button>
         <button>Button 2</button>
         <button>Button 3</button>
       </p>
-
-      <p>Clicking "Show Dialog" will open a dialog container and trap focus within it.</p>
 
       <div>
         <button onClick={() => setShowDialog(!showDialog)}>Show Dialog</button>
@@ -53,6 +58,11 @@ export default function SimpleExample() {
         <button>Button 7</button>
         <button>Button 8</button>
         <button>Button 9</button>
+      </p>
+
+      <p>
+        Also notice that even if you click out of the dialog or try to focus another button while
+        the dialog is active, focus will automatically be moved back into it.
       </p>
     </div>
   );

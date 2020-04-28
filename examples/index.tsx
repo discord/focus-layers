@@ -1,27 +1,33 @@
-import React from "react";
+import * as React from "react";
 import { render } from "react-dom";
 
 import { FocusGuard } from "../src/useFocusLock";
 
 import SimpleExample from "./SimpleExample";
-import NestedExample from "./NestedExample";
-import DistributedExample from "./DistributedExample";
+import LayeringExample from "./LayeringExample";
+import FreeFocusToggleExample from "./FreeFocusToggleExample";
+import SubscriptionExample from "./SubscriptionExample";
 
-render(
-  <div style={{ fontFamily: "sans-serif", maxWidth: 600, margin: "auto", lineHeight: 1.4 }}>
-    <FocusGuard />
+function Index() {
+  return (
+    <div>
+      <FocusGuard />
 
-    <p>
-      Here are a few examples of using focus layers. This page also includes <code>FocusGuard</code>
-      components at the edges to show how they can restrict focus entirely within an application's
-      content and away from the browser's controls.
-    </p>
+      <p>
+        This page shows a few ways that <code>focus-layers</code> can be used. This page also
+        includes the <code>FocusGuard</code> components at the edges to show how they can restrict
+        focus. The focus ring has also been overridden to make it more obvious where focus currently
+        resides on the page at any given time.
+      </p>
 
-    <SimpleExample />
-    <NestedExample />
-    <DistributedExample />
+      <SimpleExample />
+      <LayeringExample />
+      <FreeFocusToggleExample />
+      <SubscriptionExample />
 
-    <FocusGuard />
-  </div>,
-  document.getElementById("root"),
-);
+      <FocusGuard />
+    </div>
+  );
+}
+
+render(<Index />, document.getElementById("root"));

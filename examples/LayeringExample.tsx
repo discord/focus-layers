@@ -2,24 +2,27 @@ import * as React from "react";
 
 import Dialog from "./Dialog";
 
-export default function NestedExample() {
+export default function LayeringExample() {
   const [showNestingDialog, setShowNestingDialog] = React.useState(false);
   const [showNestedDialog, setShowNestedDialog] = React.useState(false);
   const [showAdjacentDialog, setShowAdjacentDialog] = React.useState(false);
 
   return (
     <div>
-      <h1>Lock Layers</h1>
+      <h1>Layering</h1>
 
       <p>
-        Locks can be safely nested. Locks maintain a Stack-like context such that only the top-most
-        lock is active at any given time. This means nested locks, portaled locks, and any other
-        instances of layering are supported the same way. No tracking on the user side is necessary.
+        Locks can be safely nested and chained together. Locks maintain a Stack-like context such
+        that only the top-most lock is active at any given time. This means nested locks, portaled
+        locks, and any other instances of layering are supported the same way. No additional
+        tracking on the user side is necessary.
       </p>
 
       <p>
-        Note that this is <em>not</em> the same as "distributed locks" where a single lock layer
-        spans multiple nodes. Such behavior is not currently supported.
+        Open the first dialog with the button below, then open either the nested or adjacent dialog
+        from within it via the labeled buttons. Each dialog is its own focus layer, so opening new
+        ones will restrict focus to wherever that new dialog exists, even if it is not within the
+        container of the original dialog.
       </p>
 
       <button onClick={() => setShowNestingDialog(true)}>Show First Dialog</button>
@@ -61,6 +64,8 @@ export default function NestedExample() {
             This dialog exists next to the first Dialog. It traps focus within itself, then returns
             focus to the first dialog when closed.
           </p>
+          <button>Adjacent button 1</button>
+          <button>Adjacent button 2</button>
           <button onClick={() => setShowAdjacentDialog(false)}>Close Adjacent Dialog</button>
         </Dialog>
       ) : null}
