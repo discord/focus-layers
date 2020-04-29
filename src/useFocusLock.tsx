@@ -80,8 +80,9 @@ export function useLockSubscription(callback: EnabledCallback) {
 export function withFocusLayer(callback: () => unknown) {
   const lockId = newLockUID();
   LOCK_STACK.add(lockId, () => null);
-  callback();
+  const result = callback();
   LOCK_STACK.remove(lockId);
+  return result;
 }
 
 function createFocusWalker(root: HTMLElement) {
