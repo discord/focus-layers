@@ -77,6 +77,13 @@ export function useLockSubscription(callback: EnabledCallback) {
   }, [callback]);
 }
 
+export function withFocusLayer(callback: () => unknown) {
+  const lockId = newLockUID();
+  LOCK_STACK.add(lockId, () => null);
+  callback();
+  LOCK_STACK.remove(lockId);
+}
+
 function createFocusWalker(root: HTMLElement) {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
     acceptNode: (node: HTMLElement) =>

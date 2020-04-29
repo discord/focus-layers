@@ -283,17 +283,16 @@ The layer gets added on mount, disabling all layers below it, and since there's 
 activate, the return value is just ignored, and nothing else needs to happen.
 
 Free focus layers are also great for compatibility with libraries or other operations that rely on
-moving focus around the DOM like some implementations of `copy` utilities and masked inputs. For
-example, a copy action could add and remove a layer around the operation to allow it to reference a
-`textarea` outside of a dialog layer:
+moving focus around the DOM like some implementations of `copy` utilities and masked inputs. To
+accommodate this, a `withFocusLayer` function is provided, which will add and remove a blank focus
+layer around the given callback. For example, a copy action could add and remove a layer around the
+operation to allow it to reference a `textarea` outside of a dialog layer:
 
 ```tsx
-import { LOCK_STACK } from 'focus-layers';
+import { withFocusLayer } from 'focus-layers';
 
 function copy(someText: string) {
-  LOCK_STACK.add('copy', () => null);
-  doCopy(someText);
-  LOCK_STACK.remove('copy');
+  withFocusLayer(() => doCopy(someText));
 }
 
 function DialogWithCopyableText() {
