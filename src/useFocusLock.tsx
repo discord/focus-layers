@@ -77,7 +77,7 @@ export function useLockSubscription(callback: EnabledCallback) {
   }, [callback]);
 }
 
-export function withFocusLayer(callback: () => unknown) {
+export function withFocusLayer<T = unknown>(callback: () => T) {
   const lockId = newLockUID();
   LOCK_STACK.add(lockId, () => null);
   const result = callback();
