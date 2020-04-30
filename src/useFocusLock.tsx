@@ -77,14 +77,6 @@ export function useLockSubscription(callback: EnabledCallback) {
   }, [callback]);
 }
 
-export function withFocusLayer<T = unknown>(callback: () => T) {
-  const lockId = newLockUID();
-  LOCK_STACK.add(lockId, () => null);
-  const result = callback();
-  LOCK_STACK.remove(lockId);
-  return result;
-}
-
 function createFocusWalker(root: HTMLElement) {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
     acceptNode: (node: HTMLElement) =>
@@ -146,8 +138,13 @@ export function useLockLayer(controlledUID?: string) {
 
 export function useFocusLock(
   containerRef: React.RefObject<HTMLElement>,
-  returnRef?: React.RefObject<HTMLElement>,
+  options: {
+    returnRef?: React.RefObject<HTMLElement>;
+    attachTo?: HTMLElement | Document;
+  } = {},
 ) {
+  const { returnRef, attachTo = document } = options;
+
   const enabled = useLockLayer();
   useFocusReturn(returnRef);
 
@@ -166,8 +163,9 @@ export function useFocusLock(
       }
     }
 
-    document.addEventListener("focusin", handleFocusIn, { capture: true });
-    return () => document.removeEventListener("focusin", handleFocusIn, { capture: true });
+    attachTo.addEventListener("focusin", handleFocusIn as EventListener, { capture: true });
+    return () =>
+      attachTo.removeEventListener("focusin", handleFocusIn as EventListener, { capture: true });
   }, [containerRef, enabled]);
 
   React.useLayoutEffect(() => {
