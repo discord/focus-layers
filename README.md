@@ -57,7 +57,7 @@ function DialogWithExplicitReturn() {
 
   const containerRef = React.useRef<HTMLDivElement>();
   const returnRef = React.useRef<HTMLButtonElement>();
-  useFocusLock(containerRef, returnRef);
+  useFocusLock(containerRef, { returnRef });
 
   return (
     <React.Fragment>
@@ -282,26 +282,33 @@ function View() {
 The layer gets added on mount, disabling all layers below it, and since there's no new lock to
 activate, the return value is just ignored, and nothing else needs to happen.
 
-Free focus layers are also great for compatibility with libraries or other operations that rely on
-moving focus around the DOM like some implementations of `copy` utilities and masked inputs. To
-accommodate this, a `withFocusLayer` function is provided, which will add and remove a blank focus
-layer around the given callback. For example, a copy action could add and remove a layer around the
-operation to allow it to reference a `textarea` outside of a dialog layer:
+## Scoped Roots
+
+By default `useFocusLock` will attach a focus listener to the `document` itself, to capture all
+focus events that happen on the page. Sometimes this can have unintended consequences where a
+utility function wants to quickly focus an external element and perform an action. For example,
+cross-platform copy utilities often do this
+([see MDN clipboard example](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Interact_with_the_clipboard#Writing_to_the_clipboard)).
+
+Free Focus layers _would_ be good for this, but because these hooks are based around `useEffect`,
+it's likely that the current lock layer wouldn't be disabled in time for the utility to do its job.
+To get around this, you can scope where `useFocusLock` attaches listeners via the `attachTo` option.
+A good candidate for this is the node that your app is mounted to, and then have these other
+utilities do their work outside of that subtree.
 
 ```tsx
-import { withFocusLayer } from 'focus-layers';
-
-function copy(someText: string) {
-  withFocusLayer(() => doCopy(someText));
-}
+import { useFocusLock } from "focus-layers";
 
 function DialogWithCopyableText() {
+  const containerRef = React.useRef<HTMLDivElement>();
+  useFocusLock(containerRef, { attachTo: document.getElementById("app-mount") || document });
+
   const text = "this is the copied text";
 
   return (
-    <Dialog>
+    <div containerRef={containerRef}>
       <button onClick={() => copy(text)}>Copy some text</button>
-    </Dialgo>
+    </div>
   );
 }
 ```
