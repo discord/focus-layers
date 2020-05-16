@@ -1,7 +1,7 @@
 import * as React from "react";
 
 type EnabledCallback = (enabled: boolean) => unknown;
-type StackEntry = { uid: string; setEnabled: EnabledCallback };
+type StackEntry = { uid: string; isEnabled: boolean; setEnabled: EnabledCallback };
 
 class LockStack {
   stack: StackEntry[] = [];
@@ -10,9 +10,10 @@ class LockStack {
 
   add(uid: string, setEnabled: EnabledCallback) {
     const current = this.current();
-    if (current != null) current.setEnabled(false);
-    this.stack.push({ uid, setEnabled });
-    setEnabled(true);
+    if (current != null) this.toggleLayer(current, false);
+    const newLayer = { uid, setEnabled, isEnabled: true };
+    this.stack.push(newLayer);
+    this.toggleLayer(newLayer, true);
     this.emit();
   }
 
@@ -21,7 +22,7 @@ class LockStack {
     const oldCurrent = this.current();
     // If the layer was currently the active one, mark it disabled before removing.
     if (removed != null && removed === oldCurrent) {
-      removed.setEnabled(false);
+      this.toggleLayer(removed, false);
     }
 
     this.stack = this.stack.filter((lock) => lock.uid !== uid);
@@ -29,7 +30,7 @@ class LockStack {
     // If a different layer is now the active one, mark it as enabled.
     const newCurrent = this.current();
     if (newCurrent != null && newCurrent !== oldCurrent) {
-      newCurrent.setEnabled(true);
+      this.toggleLayer(newCurrent, true);
     }
     this.emit();
   }
@@ -57,6 +58,11 @@ class LockStack {
       this.listeners.forEach((callback) => callback(isActive));
       this.active = isActive;
     }
+  }
+
+  toggleLayer(layer: StackEntry, enabled: boolean) {
+    layer.setEnabled(enabled);
+    layer.isEnabled = enabled;
   }
 }
 
@@ -159,6 +165,7 @@ export function useFocusLock(
       const prevFocusElement = event.relatedTarget as Element | null;
 
       if (!root.contains(newFocusElement)) {
+        event.preventDefault();
         wrapFocus(root, newFocusElement, prevFocusElement);
       }
     }
