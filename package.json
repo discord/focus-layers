@@ -1,6 +1,6 @@
 {
   "name": "focus-layers",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Jon Egeland <jonegeland@gmail.com>",
   "description": "Tiny React hooks for isolating focus within subsections of the DOM.",
   "license": "MIT",
