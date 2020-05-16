@@ -93,7 +93,7 @@ function createFocusWalker(root: HTMLElement) {
   });
 }
 
-function wrapFocus(root: HTMLElement, target: Element, previousElement?: Element | null) {
+function wrapFocus(root: HTMLElement, target: Element) {
   const walker = createFocusWalker(root);
   const position = target.compareDocumentPosition(root);
   let wrappedTarget = null;
@@ -101,7 +101,7 @@ function wrapFocus(root: HTMLElement, target: Element, previousElement?: Element
   // previousElement would be null if a) there wasn't an element focused before
   // or b) focus came into the document from outside. In either case, it can be
   // treated as a reset point to bring focus back into the layer.
-  if (position & Node.DOCUMENT_POSITION_PRECEDING || previousElement == null) {
+  if (position & Node.DOCUMENT_POSITION_PRECEDING) {
     wrappedTarget = walker.firstChild() as HTMLElement | null;
   } else if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
     wrappedTarget = walker.lastChild() as HTMLElement | null;
@@ -162,11 +162,9 @@ export function useFocusLock(
       if (root == null) return;
 
       const newFocusElement = (event.target as Element | null) || document.body;
-      const prevFocusElement = event.relatedTarget as Element | null;
-
       if (!root.contains(newFocusElement)) {
         event.preventDefault();
-        wrapFocus(root, newFocusElement, prevFocusElement);
+        wrapFocus(root, newFocusElement);
       }
     }
 
