@@ -5,6 +5,16 @@ import Dialog from "./Dialog";
 export default function SimpleExample() {
   const [showDialog, setShowDialog] = React.useState(false);
 
+  const [showAutofocus, setShowAutofocus] = React.useState(false);
+  React.useEffect(() => {
+    if (!showDialog) {
+      setShowAutofocus(false);
+      return;
+    }
+
+    setTimeout(() => setShowAutofocus(true), 500);
+  }, [showDialog]);
+
   return (
     <div>
       <h1>Simple Example</h1>
@@ -45,7 +55,7 @@ export default function SimpleExample() {
               </select>
             </div>
             <button>Button 4</button>
-            <button autoFocus>Autofocused button</button>
+            {showAutofocus && <button autoFocus>Autofocused button</button>}
             <button>Button 6</button>
             <div>
               <button onClick={() => setShowDialog(false)}>Close Dialog</button>

@@ -1,70 +1,7 @@
 import * as React from "react";
 
-type EnabledCallback = (enabled: boolean) => unknown;
-type StackEntry = { uid: string; isEnabled: boolean; setEnabled: EnabledCallback };
-
-class LockStack {
-  stack: StackEntry[] = [];
-  listeners = new Set<EnabledCallback>();
-  active = false;
-
-  add(uid: string, setEnabled: EnabledCallback) {
-    const current = this.current();
-    if (current != null) this.toggleLayer(current, false);
-    const newLayer = { uid, setEnabled, isEnabled: true };
-    this.stack.push(newLayer);
-    this.toggleLayer(newLayer, true);
-    this.emit();
-  }
-
-  remove(uid: string) {
-    const removed = this.stack.find((lock) => lock.uid === uid);
-    const oldCurrent = this.current();
-    // If the layer was currently the active one, mark it disabled before removing.
-    if (removed != null && removed === oldCurrent) {
-      this.toggleLayer(removed, false);
-    }
-
-    this.stack = this.stack.filter((lock) => lock.uid !== uid);
-
-    // If a different layer is now the active one, mark it as enabled.
-    const newCurrent = this.current();
-    if (newCurrent != null && newCurrent !== oldCurrent) {
-      this.toggleLayer(newCurrent, true);
-    }
-    this.emit();
-  }
-
-  current(): StackEntry | undefined {
-    return this.stack[this.stack.length - 1];
-  }
-
-  isActive(uid: string) {
-    const current = this.current();
-    return current != null && current.uid === uid;
-  }
-
-  subscribe(callback: EnabledCallback) {
-    this.listeners.add(callback);
-  }
-
-  unsubscribe(callback: EnabledCallback) {
-    this.listeners.delete(callback);
-  }
-
-  emit() {
-    const isActive = this.current() != null;
-    if (isActive !== this.active) {
-      this.listeners.forEach((callback) => callback(isActive));
-      this.active = isActive;
-    }
-  }
-
-  toggleLayer(layer: StackEntry, enabled: boolean) {
-    layer.setEnabled(enabled);
-    layer.isEnabled = enabled;
-  }
-}
+import LockStack, { LockListener } from "./LockStack";
+import wrapFocus from "./util/wrapFocus";
 
 // This global ensures that only one stack exists in the document. Having multiple
 // active stacks does not make sense, as documents are only capable of having one
@@ -76,45 +13,31 @@ function newLockUID() {
   return `lock-${lockCount++}`;
 }
 
-export function useLockSubscription(callback: EnabledCallback) {
-  React.useEffect(() => {
-    LOCK_STACK.subscribe(callback);
-    return () => LOCK_STACK.unsubscribe(callback);
-  }, [callback]);
+/**
+ * Creates a subscription to the lock stack that is bound to the lifetime
+ * of the caller, based on `useEffect`.
+ */
+export function useLockSubscription(callback: LockListener) {
+  // `subscribe` returns an `unsubscribe` function that `useEffect` can invoke
+  // to clean up the subscription.
+  React.useEffect(() => LOCK_STACK.subscribe(callback), [callback]);
 }
 
-function createFocusWalker(root: HTMLElement) {
-  return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
-    acceptNode: (node: HTMLElement) =>
-      // `.tabIndex` is not the same as the `tabindex` attribute. It works on the
-      // runtime's understanding of tabbability, so this automatically accounts
-      // for any kind of element that could be tabbed to.
-      node.tabIndex >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP,
-  });
-}
-
-function wrapFocus(root: HTMLElement, target: Element) {
-  const walker = createFocusWalker(root);
-  const position = target.compareDocumentPosition(root);
-  let wrappedTarget = null;
-
-  // previousElement would be null if a) there wasn't an element focused before
-  // or b) focus came into the document from outside. In either case, it can be
-  // treated as a reset point to bring focus back into the layer.
-  if (position & Node.DOCUMENT_POSITION_PRECEDING) {
-    wrappedTarget = walker.firstChild() as HTMLElement | null;
-  } else if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
-    wrappedTarget = walker.lastChild() as HTMLElement | null;
-  }
-
-  wrappedTarget != null && wrappedTarget.focus();
-}
-
-export function useFocusReturn(returnTo?: React.RefObject<HTMLElement>) {
+/**
+ * Set up a return of focus to the target element specified by `returnTo` to
+ * occur at the end of the lifetime of the caller component. In other words,
+ * return focus to where it was before the caller component was mounted.
+ */
+export function useFocusReturn(
+  returnTo?: React.RefObject<HTMLElement>,
+  enabledRef?: React.RefObject<boolean>,
+) {
   const [focusedOnMount] = React.useState(() => document.activeElement);
 
   React.useLayoutEffect(() => {
     return () => {
+      if (enabledRef != null && !enabledRef.current) return;
+
       // Specifically want the actual current value when this hook is cleaning up.
       // eslint-disable-next-line react-hooks/exhaustive-deps
       const target = returnTo != null ? returnTo.current : focusedOnMount;
@@ -122,7 +45,7 @@ export function useFocusReturn(returnTo?: React.RefObject<HTMLElement>) {
       Promise.resolve().then(() => {
         // TODO: how is this typeable? `Element` doesn't implement `focus`
         // @ts-ignore
-        target != null && target.focus != null && target.focus();
+        target?.focus?.();
       });
     };
     // Explicitly only want this to run on unmount
@@ -130,58 +53,89 @@ export function useFocusReturn(returnTo?: React.RefObject<HTMLElement>) {
   }, []);
 }
 
+/**
+ * Create and push a new lock onto the global LOCK_STACK, tied to the lifetime
+ * of the caller. Returns a ref containing the current enabled state of the
+ * layer, to be used for enabling/disabling the caller's lock logic.
+ */
 export function useLockLayer(controlledUID?: string) {
   const [uid] = React.useState(() => controlledUID || newLockUID());
-  const [enabled, setEnabled] = React.useState(false);
+  const enabledRef = React.useRef(false);
 
-  React.useEffect(() => {
-    LOCK_STACK.add(uid, setEnabled);
+  React.useLayoutEffect(() => {
+    LOCK_STACK.add(uid, (enabled) => (enabledRef.current = enabled));
     return () => LOCK_STACK.remove(uid);
   }, [uid]);
 
-  return enabled;
+  return enabledRef;
 }
 
-export function useFocusLock(
+export default function useFocusLock(
   containerRef: React.RefObject<HTMLElement>,
   options: {
     returnRef?: React.RefObject<HTMLElement>;
     attachTo?: HTMLElement | Document;
+    disable?: boolean;
   } = {},
 ) {
-  const { returnRef, attachTo = document } = options;
+  const { returnRef, attachTo = document, disable } = options;
+  // Create a new layer for this lock to occupy
+  const enabledRef = useLockLayer();
 
-  const enabled = useLockLayer();
-  useFocusReturn(returnRef);
+  // Allow the caller to override the lock and force it to be disabled.
+  React.useEffect(() => {
+    if (!disable) return;
+    enabledRef.current = false;
+  }, [disable]);
 
+  // Add the
   React.useLayoutEffect(() => {
-    if (!enabled) return;
-
     function handleFocusIn(event: FocusEvent) {
+      if (!enabledRef.current) return;
+
       const root = containerRef.current;
       if (root == null) return;
 
       const newFocusElement = (event.target as Element | null) || document.body;
-      if (!root.contains(newFocusElement)) {
-        event.preventDefault();
-        wrapFocus(root, newFocusElement);
-      }
+      if (root.contains(newFocusElement)) return;
+
+      event.preventDefault();
+      wrapFocus(root, newFocusElement);
     }
 
     attachTo.addEventListener("focusin", handleFocusIn as EventListener, { capture: true });
-    return () =>
+    return () => {
       attachTo.removeEventListener("focusin", handleFocusIn as EventListener, { capture: true });
-  }, [containerRef, enabled]);
+    };
+  }, [containerRef]);
 
+  // Move focus into the container if it is not already, or if an element
+  // inside of the container will automatically receive focus, it won't be moved.
   React.useLayoutEffect(() => {
-    if (containerRef.current != null && !containerRef.current.contains(document.activeElement)) {
-      containerRef.current.focus();
+    const container = containerRef.current;
+    if (
+      container != null &&
+      !container.contains(document.activeElement) &&
+      container.querySelector("[autofocus]") == null
+    ) {
+      container.focus();
     }
-  });
+  }, []);
+
+  // Set up a focus return after the container is unmounted.
+  useFocusReturn(returnRef, enabledRef);
 }
 
-export default useFocusLock;
-
+/**
+ * A convenience component for rendering "guard elements" that ensure there is
+ * always a tabbable element either before or after (or both) an active lock.
+ * These are most easily rendered right at the edges of the React rendering root
+ * so that all locks can utilize the same guards.
+ *
+ * When no lock is active, `FocusGuard` is completely invisible, both visually
+ * and in the focus order. When active, it gets a tabindex, but always remains
+ * visually hidden.
+ */
 export const FocusGuard = React.memo(() => {
   const [active, setActive] = React.useState(false);
   useLockSubscription(setActive);
