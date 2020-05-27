@@ -28,24 +28,18 @@ export function useLockSubscription(callback: LockListener) {
  * occur at the end of the lifetime of the caller component. In other words,
  * return focus to where it was before the caller component was mounted.
  */
-export function useFocusReturn(
-  returnTo?: React.RefObject<HTMLElement>,
-  enabledRef?: React.RefObject<boolean>,
-) {
-  const [focusedOnMount] = React.useState(() => document.activeElement);
+export function useFocusReturn(returnTo?: React.RefObject<HTMLElement>) {
+  // This isn't necessarily safe, but realistically it's sufficient.
+  const [focusedOnMount] = React.useState(() => document.activeElement as HTMLElement);
 
   React.useLayoutEffect(() => {
     return () => {
-      if (enabledRef != null && !enabledRef.current) return;
-
       // Specifically want the actual current value when this hook is cleaning up.
       // eslint-disable-next-line react-hooks/exhaustive-deps
       const target = returnTo != null ? returnTo.current : focusedOnMount;
       // Happens on next tick to ensure it is not overwritten by focus lock.
-      Promise.resolve().then(() => {
-        // TODO: how is this typeable? `Element` doesn't implement `focus`
-        // @ts-ignore
-        target?.focus?.();
+      requestAnimationFrame(() => {
+        target != null && target.focus();
       });
     };
     // Explicitly only want this to run on unmount
@@ -88,7 +82,7 @@ export default function useFocusLock(
     enabledRef.current = false;
   }, [disable]);
 
-  // Add the
+  // Apply the actual lock logic to the container.
   React.useLayoutEffect(() => {
     function handleFocusIn(event: FocusEvent) {
       if (!enabledRef.current) return;
@@ -100,12 +94,32 @@ export default function useFocusLock(
       if (root.contains(newFocusElement)) return;
 
       event.preventDefault();
+      event.stopImmediatePropagation();
+      wrapFocus(root, newFocusElement);
+    }
+
+    function handleFocusOut(event: FocusEvent) {
+      if (!enabledRef.current) return;
+
+      const root = containerRef.current;
+      if (root == null) return;
+
+      if (event.relatedTarget == null || event.relatedTarget === document.body) {
+        event.preventDefault();
+        root.focus();
+      }
+
+      const newFocusElement = (event.target as Element | null) || document.body;
+      if (root.contains(newFocusElement)) return;
+
       wrapFocus(root, newFocusElement);
     }
 
     attachTo.addEventListener("focusin", handleFocusIn as EventListener, { capture: true });
+    attachTo.addEventListener("focusout", handleFocusOut as EventListener, { capture: true });
     return () => {
       attachTo.removeEventListener("focusin", handleFocusIn as EventListener, { capture: true });
+      attachTo.removeEventListener("focusout", handleFocusOut as EventListener, { capture: true });
     };
   }, [containerRef]);
 
@@ -123,7 +137,10 @@ export default function useFocusLock(
   }, []);
 
   // Set up a focus return after the container is unmounted.
-  useFocusReturn(returnRef, enabledRef);
+  // This happens at the end to absolutely ensure that the return is the last
+  // thing that will run as part of this hook (i.e., that the focus handlers
+  // have been fully detached).
+  useFocusReturn(returnRef);
 }
 
 /**

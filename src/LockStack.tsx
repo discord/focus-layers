@@ -74,7 +74,8 @@ export default class LockStack {
     const lock = this.locks.find((lock) => lock.uid === uid);
     this.toggleLayer(lock, false);
 
-    const wasCurrent = this.current()?.uid === uid;
+    const current = this.current();
+    const wasCurrent = current != null && current.uid === uid;
     this.locks = this.locks.filter((lock) => lock.uid !== uid);
 
     if (wasCurrent) this.toggleLayer(this.current(), true);
@@ -92,7 +93,8 @@ export default class LockStack {
    * Returns the enabled state of the currently-active lock.
    */
   isActive() {
-    return this.current()?.enabled ?? false;
+    const current = this.current();
+    return current != null ? current.enabled : false;
   }
 
   /**

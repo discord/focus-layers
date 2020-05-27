@@ -4,7 +4,8 @@ function createFocusWalker(root: HTMLElement) {
       // `.tabIndex` is not the same as the `tabindex` attribute. It works on the
       // runtime's understanding of tabbability, so this automatically accounts
       // for any kind of element that could be tabbed to.
-      node.tabIndex >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP,
+      // @ts-ignore
+      node.tabIndex >= 0 && !node.disabled ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP,
   });
 }
 
@@ -16,7 +17,7 @@ function createFocusWalker(root: HTMLElement) {
 export default function wrapFocus(root: HTMLElement, target: Element) {
   const walker = createFocusWalker(root);
   const position = target.compareDocumentPosition(root);
-  let wrappedTarget = null;
+  let wrappedTarget: HTMLElement | null = null;
 
   if (position & Node.DOCUMENT_POSITION_PRECEDING) {
     wrappedTarget = walker.firstChild() as HTMLElement | null;
@@ -24,5 +25,6 @@ export default function wrapFocus(root: HTMLElement, target: Element) {
     wrappedTarget = walker.lastChild() as HTMLElement | null;
   }
 
-  wrappedTarget?.focus();
+  const newFocus = wrappedTarget != null ? wrappedTarget : root;
+  newFocus.focus();
 }
