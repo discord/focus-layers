@@ -28,15 +28,13 @@ export function useLockSubscription(callback: LockListener) {
  * occur at the end of the lifetime of the caller component. In other words,
  * return focus to where it was before the caller component was mounted.
  */
-export function useFocusReturn(returnTo?: React.RefObject<HTMLElement>) {
+export function useFocusReturn(disabledRef?: React.RefObject<boolean>) {
   // This isn't necessarily safe, but realistically it's sufficient.
-  const [focusedOnMount] = React.useState(() => document.activeElement as HTMLElement);
+  const [target] = React.useState(() => document.activeElement as HTMLElement);
 
   React.useLayoutEffect(() => {
     return () => {
-      // Specifically want the actual current value when this hook is cleaning up.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      const target = returnTo != null ? returnTo.current : focusedOnMount;
+      if (disabledRef != null && disabledRef.current) return;
       // Happens on next tick to ensure it is not overwritten by focus lock.
       requestAnimationFrame(() => {
         target != null && target.focus();
@@ -67,12 +65,12 @@ export function useLockLayer(controlledUID?: string) {
 export default function useFocusLock(
   containerRef: React.RefObject<HTMLElement>,
   options: {
-    returnRef?: React.RefObject<HTMLElement>;
+    disableReturnRef?: React.RefObject<boolean>;
     attachTo?: HTMLElement | Document;
     disable?: boolean;
   } = {},
 ) {
-  const { returnRef, attachTo = document, disable } = options;
+  const { disableReturnRef, attachTo = document, disable } = options;
   // Create a new layer for this lock to occupy
   const enabledRef = useLockLayer();
 
@@ -140,7 +138,7 @@ export default function useFocusLock(
   // This happens at the end to absolutely ensure that the return is the last
   // thing that will run as part of this hook (i.e., that the focus handlers
   // have been fully detached).
-  useFocusReturn(returnRef);
+  useFocusReturn(disableReturnRef);
 }
 
 /**
