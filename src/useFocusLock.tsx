@@ -82,6 +82,18 @@ export default function useFocusLock(
 
   // Apply the actual lock logic to the container.
   React.useLayoutEffect(() => {
+    // Move focus into the container if it is not already, or if an element
+    // inside of the container will automatically receive focus, it won't be moved.
+    const container = containerRef.current;
+    if (
+      container != null &&
+      document.activeElement != null &&
+      !container.contains(document.activeElement) &&
+      container.querySelector("[autofocus]") == null
+    ) {
+      wrapFocus(container, document.activeElement, true);
+    }
+
     function handleFocusIn(event: FocusEvent) {
       if (!enabledRef.current) return;
 
@@ -120,19 +132,6 @@ export default function useFocusLock(
       attachTo.removeEventListener("focusout", handleFocusOut as EventListener, { capture: true });
     };
   }, [containerRef]);
-
-  // Move focus into the container if it is not already, or if an element
-  // inside of the container will automatically receive focus, it won't be moved.
-  React.useLayoutEffect(() => {
-    const container = containerRef.current;
-    if (
-      container != null &&
-      !container.contains(document.activeElement) &&
-      container.querySelector("[autofocus]") == null
-    ) {
-      container.focus();
-    }
-  }, []);
 
   // Set up a focus return after the container is unmounted.
   // This happens at the end to absolutely ensure that the return is the last

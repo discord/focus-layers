@@ -13,13 +13,16 @@ function createFocusWalker(root: HTMLElement) {
  * Given a `root` container element and a `target` that is outside of that
  * container and intended to receive focus, force the DOM focus to wrap around
  * such that it remains within `root`.
+ *
+ * If `forceFirst` is set to `true`, the wrap will always attempt to focus the
+ * first viable element in `root`, rather than wrapping to the end.
  */
-export default function wrapFocus(root: HTMLElement, target: Element) {
+export default function wrapFocus(root: HTMLElement, target: Element, forceFirst: boolean = false) {
   const walker = createFocusWalker(root);
   const position = target.compareDocumentPosition(root);
   let wrappedTarget: HTMLElement | null = null;
 
-  if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+  if (position & Node.DOCUMENT_POSITION_PRECEDING || forceFirst) {
     wrappedTarget = walker.firstChild() as HTMLElement | null;
   } else if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
     wrappedTarget = walker.lastChild() as HTMLElement | null;
