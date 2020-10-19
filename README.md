@@ -263,7 +263,7 @@ function Component() {
 Custom locks can also be used to implement "free focus layers" without losing the context of the
 focus layers that are currently in place. Free focus is a situation where focus is not locked into
 any subsection and can move freely throughout the document. This can be useful for single-page
-applications that want to preserve focus state between mutiple views where previous views get
+applications that want to preserve focus state between multiple views where previous views get
 removed from the DOM while another view takes its place.
 
 A free focus layer can easily be implemented as part of a Component. In the single-page application
@@ -318,7 +318,7 @@ function DialogWithCopyableText() {
 This library was created after multiple attempts at using other focus locking libraries and wanting
 something with a simpler implementation that leverages the browser's APIs as much as possible, and
 fewer implications on DOM and Component structures. There are multiple other options out there that
-perform a simlar job in different ways, such as:
+perform a similar job in different ways, such as:
 
 - [react-focus-lock](https://github.com/theKashey/react-focus-lock): Lots of options, very flexible,
   but uses a lot of DOM nodes and attributes.
