@@ -116,7 +116,8 @@ export default class LockStack {
    */
   subscribe(callback: LockListener): () => void {
     this.listeners.push(callback);
-    return () => this.listeners.filter((listener) => listener !== callback);
+    callback(this.isActive(), this.locks);
+    return () => this.listeners = this.listeners.filter((listener) => listener !== callback);
   }
 
   /**
