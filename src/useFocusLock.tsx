@@ -28,7 +28,10 @@ export function useLockSubscription(callback: LockListener) {
  * occur at the end of the lifetime of the caller component. In other words,
  * return focus to where it was before the caller component was mounted.
  */
-export function useFocusReturn(disabledRef?: React.RefObject<boolean>) {
+export function useFocusReturn(
+  returnRef?: React.RefObject<HTMLElement>,
+  disabledRef?: React.RefObject<boolean>,
+) {
   // This isn't necessarily safe, but realistically it's sufficient.
   const [target] = React.useState(() => document.activeElement as HTMLElement);
 
@@ -37,6 +40,10 @@ export function useFocusReturn(disabledRef?: React.RefObject<boolean>) {
       if (disabledRef != null && disabledRef.current) return;
       // Happens on next tick to ensure it is not overwritten by focus lock.
       requestAnimationFrame(() => {
+        if (returnRef != null && returnRef.current != null) {
+          returnRef.current.focus();
+          return;
+        }
         target != null && target.focus();
       });
     };
@@ -62,15 +69,18 @@ export function useLockLayer(controlledUID?: string) {
   return enabledRef;
 }
 
+export type FocusLockOptions = {
+  returnRef?: React.RefObject<HTMLElement>;
+  disableReturnRef?: React.RefObject<boolean>;
+  attachTo?: HTMLElement | Document;
+  disable?: boolean;
+};
+
 export default function useFocusLock(
   containerRef: React.RefObject<HTMLElement>,
-  options: {
-    disableReturnRef?: React.RefObject<boolean>;
-    attachTo?: HTMLElement | Document;
-    disable?: boolean;
-  } = {},
+  options: FocusLockOptions = {},
 ) {
-  const { disableReturnRef, attachTo = document, disable } = options;
+  const { returnRef, disableReturnRef, attachTo = document, disable } = options;
   // Create a new layer for this lock to occupy
   const enabledRef = useLockLayer();
 
@@ -137,7 +147,7 @@ export default function useFocusLock(
   // This happens at the end to absolutely ensure that the return is the last
   // thing that will run as part of this hook (i.e., that the focus handlers
   // have been fully detached).
-  useFocusReturn(disableReturnRef);
+  useFocusReturn(returnRef, disableReturnRef);
 }
 
 /**

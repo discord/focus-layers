@@ -3,12 +3,13 @@ import useFocusLock from "../src/useFocusLock";
 
 type DialogProps = {
   children: React.ReactNode;
+  returnRef?: React.RefObject<HTMLElement>;
 };
 
 // Simple Dialog component that implements a focus lock with appropriate ARIA defaults.
-function Dialog({ children }: DialogProps) {
+function Dialog({ children, returnRef }: DialogProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  useFocusLock(containerRef);
+  useFocusLock(containerRef, { returnRef });
 
   return (
     <div
