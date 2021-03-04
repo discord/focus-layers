@@ -4,6 +4,7 @@ import { render } from "react-dom";
 import { FocusGuard } from "../src/useFocusLock";
 
 import SimpleExample from "./SimpleExample";
+import AutoFocusExample from "./AutoFocusExample";
 import LayeringExample from "./LayeringExample";
 import FreeFocusToggleExample from "./FreeFocusToggleExample";
 import SubscriptionExample from "./SubscriptionExample";
@@ -21,6 +22,7 @@ function Index() {
       </p>
 
       <SimpleExample />
+      <AutoFocusExample />
       <LayeringExample />
       <FreeFocusToggleExample />
       <SubscriptionExample />
