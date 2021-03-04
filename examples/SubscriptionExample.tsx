@@ -5,7 +5,7 @@ import { useLockSubscription } from "../src/useFocusLock";
 import Dialog from "./Dialog";
 
 export default function CustomLockExample() {
-  const [enabled, setEnabled] = React.useState();
+  const [enabled, setEnabled] = React.useState(false);
   useLockSubscription(setEnabled);
 
   return (

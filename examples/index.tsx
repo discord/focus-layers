@@ -5,6 +5,7 @@ import { FocusGuard } from "../src/useFocusLock";
 
 import SimpleExample from "./SimpleExample";
 import AutoFocusExample from "./AutoFocusExample";
+import ExplicitReturnExample from "./ExplicitReturnExample";
 import LayeringExample from "./LayeringExample";
 import FreeFocusToggleExample from "./FreeFocusToggleExample";
 import SubscriptionExample from "./SubscriptionExample";
@@ -22,6 +23,7 @@ function Index() {
       </p>
 
       <SimpleExample />
+      <ExplicitReturnExample />
       <AutoFocusExample />
       <LayeringExample />
       <FreeFocusToggleExample />
