@@ -105,17 +105,26 @@ export default function useFocusLock(
     }
 
     function handleFocusIn(event: FocusEvent) {
-      if (!enabledRef.current) return;
+      // This is scheduled for later to avoid problems when a new layer is being
+      // added on top of another. If the new layer has an `autoFocus` element, React
+      // will perform that focus before the previous layer's lock has been disabled,
+      // meaning focus will not be moved, and the new layer will just place focus on
+      // the first tabbable element, making the `autoFocus` appear broken. Waiting
+      // ensures that this layer will be disabled before attempting to intercept the
+      // autoFocus event.
+      requestAnimationFrame(() => {
+        if (!enabledRef.current) return;
 
-      const root = containerRef.current;
-      if (root == null) return;
+        const root = containerRef.current;
+        if (root == null) return;
 
-      const newFocusElement = (event.target as Element | null) || document.body;
-      if (root.contains(newFocusElement)) return;
+        const newFocusElement = (event.target as Element | null) || document.body;
+        if (root.contains(newFocusElement)) return;
 
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      wrapFocus(root, newFocusElement);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        wrapFocus(root, newFocusElement);
+      });
     }
 
     function handleFocusOut(event: FocusEvent) {
