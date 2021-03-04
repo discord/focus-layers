@@ -76,7 +76,7 @@ export type FocusLockOptions = {
   disable?: boolean;
 };
 
-export default function useFocusLock(
+export function useFocusLock(
   containerRef: React.RefObject<HTMLElement>,
   options: FocusLockOptions = {},
 ) {
@@ -158,6 +158,8 @@ export default function useFocusLock(
   // have been fully detached).
   useFocusReturn(returnRef, disableReturnRef);
 }
+
+export default useFocusLock;
 
 /**
  * A convenience component for rendering "guard elements" that ensure there is

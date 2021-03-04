@@ -1,5 +1,5 @@
 import * as React from "react";
-import useFocusLock from "../src/useFocusLock";
+import { useFocusLock } from "../src/useFocusLock";
 
 type DialogProps = {
   children: React.ReactNode;
