@@ -39,13 +39,11 @@ export function useFocusReturn(
     return () => {
       if (disabledRef != null && disabledRef.current) return;
       // Happens on next tick to ensure it is not overwritten by focus lock.
-      requestAnimationFrame(() => {
-        if (returnRef != null && returnRef.current != null) {
-          returnRef.current.focus();
-          return;
-        }
-        target != null && target.focus();
-      });
+      if (returnRef != null && returnRef.current != null) {
+        returnRef.current.focus();
+        return;
+      }
+      target != null && target.focus();
     };
     // Explicitly only want this to run on unmount
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,6 +58,11 @@ export function useFocusReturn(
 export function useLockLayer(controlledUID?: string) {
   const [uid] = React.useState(() => controlledUID || newLockUID());
   const enabledRef = React.useRef(false);
+  // When first created, immediately disable the current layer (the one below
+  // this new one) to prevent its handlers from stealing focus back when this
+  // layer mounts. Specifically, this allows `autoFocus` to work, since React
+  // will perform the autofocus before any effects have run.
+  const [] = React.useState(() => LOCK_STACK.toggleLayer(LOCK_STACK.current(), false));
 
   React.useLayoutEffect(() => {
     LOCK_STACK.add(uid, (enabled) => (enabledRef.current = enabled));
@@ -72,7 +75,7 @@ export function useLockLayer(controlledUID?: string) {
 export type FocusLockOptions = {
   returnRef?: React.RefObject<HTMLElement>;
   disableReturnRef?: React.RefObject<boolean>;
-  attachTo?: HTMLElement | Document;
+  attachToRef?: React.RefObject<HTMLElement | Document>;
   disable?: boolean;
 };
 
@@ -80,7 +83,7 @@ export function useFocusLock(
   containerRef: React.RefObject<HTMLElement>,
   options: FocusLockOptions = {},
 ) {
-  const { returnRef, disableReturnRef, attachTo = document, disable } = options;
+  const { returnRef, disableReturnRef, attachToRef = containerRef, disable } = options;
   // Create a new layer for this lock to occupy
   const enabledRef = useLockLayer();
 
@@ -105,26 +108,17 @@ export function useFocusLock(
     }
 
     function handleFocusIn(event: FocusEvent) {
-      // This is scheduled for later to avoid problems when a new layer is being
-      // added on top of another. If the new layer has an `autoFocus` element, React
-      // will perform that focus before the previous layer's lock has been disabled,
-      // meaning focus will not be moved, and the new layer will just place focus on
-      // the first tabbable element, making the `autoFocus` appear broken. Waiting
-      // ensures that this layer will be disabled before attempting to intercept the
-      // autoFocus event.
-      requestAnimationFrame(() => {
-        if (!enabledRef.current) return;
+      if (!enabledRef.current) return;
 
-        const root = containerRef.current;
-        if (root == null) return;
+      const root = containerRef.current;
+      if (root == null) return;
 
-        const newFocusElement = (event.target as Element | null) || document.body;
-        if (root.contains(newFocusElement)) return;
+      const newFocusElement = (event.target as Element | null) || document.body;
+      if (root.contains(newFocusElement)) return;
 
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        wrapFocus(root, newFocusElement);
-      });
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      wrapFocus(root, newFocusElement);
     }
 
     function handleFocusOut(event: FocusEvent) {
@@ -133,16 +127,19 @@ export function useFocusLock(
       const root = containerRef.current;
       if (root == null) return;
 
-      if (event.relatedTarget == null || event.relatedTarget === document.body) {
+      const newFocusElement = (event.relatedTarget as Element | null) || document.body;
+      if (event.relatedTarget === document.body) {
         event.preventDefault();
         root.focus();
       }
 
-      const newFocusElement = (event.target as Element | null) || document.body;
       if (root.contains(newFocusElement)) return;
 
       wrapFocus(root, newFocusElement);
     }
+
+    const attachTo = attachToRef.current;
+    if (attachTo == null) return;
 
     attachTo.addEventListener("focusin", handleFocusIn as EventListener, { capture: true });
     attachTo.addEventListener("focusout", handleFocusOut as EventListener, { capture: true });
@@ -150,7 +147,7 @@ export function useFocusLock(
       attachTo.removeEventListener("focusin", handleFocusIn as EventListener, { capture: true });
       attachTo.removeEventListener("focusout", handleFocusOut as EventListener, { capture: true });
     };
-  }, [containerRef]);
+  }, [containerRef, attachToRef]);
 
   // Set up a focus return after the container is unmounted.
   // This happens at the end to absolutely ensure that the return is the last

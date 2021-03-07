@@ -4,6 +4,7 @@ import Dialog from "./Dialog";
 
 export default function App() {
   const [open, setOpen] = React.useState(false);
+  const [open2, setOpen2] = React.useState(false);
 
   return (
     <>
@@ -17,8 +18,17 @@ export default function App() {
       {open && (
         <Dialog>
           <button>This would normally get focused</button>
+          <button onClick={() => setOpen2(true)}>Open Dialog 2</button>
           <input type="text" placeholder="But this has autofocus!" autoFocus />
           <button onClick={() => setOpen(false)}>Close Dialog</button>
+        </Dialog>
+      )}
+
+      {open2 && (
+        <Dialog>
+          <button>This would normally get focused</button>
+          <input type="text" placeholder="But this has autofocus!" autoFocus />
+          <button onClick={() => setOpen2(false)}>Close Dialog</button>
         </Dialog>
       )}
     </>
