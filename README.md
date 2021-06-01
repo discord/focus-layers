@@ -6,6 +6,10 @@ Tiny React hooks for isolating focus within subsections of the DOM. Useful for s
 No wrapper components, no emulation, no pre-defined "list of tabbable elements", and no data
 attributes. Implemented entirely with native APIs and events, with no additional dependencies.
 
+## Installation
+
+This package is published under [`focus-layers`](https://www.npmjs.com/package/focus-layers) and can be installed with any npm-compatible package manager.
+
 ## Basic Usage
 
 Call `useFocusLock` inside a component and provide it a ref to the DOM node to use as the container
