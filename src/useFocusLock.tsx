@@ -118,7 +118,7 @@ export function useFocusLock(
 
       event.preventDefault();
       event.stopImmediatePropagation();
-      wrapFocus(root, newFocusElement);
+      wrapFocus(root, newFocusElement, true);
     }
 
     function handleFocusOut(event: FocusEvent) {
@@ -141,10 +141,10 @@ export function useFocusLock(
     const attachTo = attachToRef.current;
     if (attachTo == null) return;
 
-    attachTo.addEventListener("focusin", handleFocusIn as EventListener, { capture: true });
+    window.addEventListener("focusin", handleFocusIn as EventListener, { capture: true });
     attachTo.addEventListener("focusout", handleFocusOut as EventListener, { capture: true });
     return () => {
-      attachTo.removeEventListener("focusin", handleFocusIn as EventListener, { capture: true });
+      window.removeEventListener("focusin", handleFocusIn as EventListener, { capture: true });
       attachTo.removeEventListener("focusout", handleFocusOut as EventListener, { capture: true });
     };
   }, [containerRef, attachToRef]);
