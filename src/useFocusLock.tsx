@@ -32,12 +32,9 @@ export function useFocusReturn(
   returnRef?: React.RefObject<HTMLElement>,
   disabledRef?: React.RefObject<boolean>,
 ) {
-  const [target, setTarget] = React.useState<null | HTMLElement>(null);
-
-  React.useEffect(() => {
-    // This isn't necessarily safe, but realistically it's sufficient.
-    setTarget(document.activeElement as HTMLElement);
-  }, []);
+  // This isn't necessarily safe, but realistically it's sufficient.
+  const activeElement = document.activeElement as HTMLElement;
+  const [target] = React.useState<null | HTMLElement>(activeElement);
 
   React.useLayoutEffect(() => {
     return () => {
