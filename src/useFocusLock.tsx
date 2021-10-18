@@ -57,17 +57,17 @@ export function useFocusReturn(
  * layer, to be used for enabling/disabling the caller's lock logic.
  */
 export function useLockLayer(controlledUID?: string) {
+  const uidValue = controlledUID || newLockUID();
+  const [uid] = React.useState(uidValue);
   const enabledRef = React.useRef<boolean>(false);
 
+  // When first created, immediately disable the current layer (the one below
+  // this new one) to prevent its handlers from stealing focus back when this
+  // layer mounts. Specifically, this allows `autoFocus` to work, since React
+  // will perform the autofocus before any effects have run.
+  LOCK_STACK.toggleLayer(LOCK_STACK.current(), false);
+
   React.useEffect(() => {
-    const uid = controlledUID || newLockUID();
-
-    // When first created, immediately disable the current layer (the one below
-    // this new one) to prevent its handlers from stealing focus back when this
-    // layer mounts. Specifically, this allows `autoFocus` to work, since React
-    // will perform the autofocus before any effects have run.
-    LOCK_STACK.toggleLayer(LOCK_STACK.current(), false);
-
     LOCK_STACK.add(uid, (enabled) => (enabledRef.current = enabled));
     return () => LOCK_STACK.remove(uid);
   }, []);
