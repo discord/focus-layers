@@ -170,7 +170,7 @@ export default useFocusLock;
  */
 export const FocusGuard = React.memo(() => {
   const [active, setActive] = React.useState(false);
-  useLockSubscription(setActive);
+  useLockSubscription((newActiveState) => setActive(newActiveState));
 
   return (
     <div
