@@ -127,7 +127,8 @@ export function useFocusLock(
       const root = containerRef.current;
       if (root == null) return;
 
-      const newFocusElement = (event.relatedTarget as Element | null) || document.body;
+      const newFocusElement =
+        (event.relatedTarget as Element | null) || document.activeElement || document.body;
       if (event.relatedTarget === document.body) {
         event.preventDefault();
         root.focus();
